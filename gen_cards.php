@@ -35,6 +35,8 @@ function getArg($key) {
 		'main_card_height' => 1122,
 		'image_location' => "images/",
 		'finished_cards_location' => "cards/",
+		'center_offset' => 'none', // note - left or right or none
+		'center_image_size' => 600, // note - this is the size of whatever in the image you want to center
 		// TODO - figure out how to do templates or something; might be easier with a class structure
 		'text_file_name_format' => "",
 		'tiny_suit_name_format' => "",
@@ -54,12 +56,29 @@ function getIDBuffer() {
 	return getArg('buffer');
 }
 
+// which suits/ranks to create
 function getSuits() {
 	return getArg('suits');
 }
-
 function getRanks() {
 	return getArg('ranks');
+}
+
+// card size
+function getCardHeight() {
+	return getArg('main_card_height');
+}
+
+function getCardWidth() {
+	return getArg('main_card_width');
+}
+
+// this is for the ace/facecard for centering the suit
+function getCenterOffset() {
+	return getArg('center_offset');
+}
+function getCenterImageSize() {
+	return getArg('center_image_size');
 }
 
 $options = parseArgs();
@@ -91,9 +110,26 @@ function gen_card($suit, $rank) {
 	$cm_width = $card_main->getImageWidth();
 
 	$buffer = getIDBuffer();
-	$main_width = 822;
-	$main_height = 1122;
-	// make the card
+	$main_width = getCardWidth();
+	$main_height = getCardHeight();
+
+	// TODO offset the center image
+	$offset_dir = getCenterOffset();
+	$offset = 0;
+	if ($offset_dir != "none") {
+		$centering_width = getCenterImageSize();
+		if ($offset_dir == "left") {
+			// means the whole image should be shifted from the left
+			$offset = $cm_width - $centering_width;
+		} else if ($offset_dir == "right") {
+			// means the whole image should be shifted from the right
+			// basically negative left
+			$offset = -$cm_width + $centering_width;
+		}
+	}
+
+	// make the card; start with putting on the middle image
+	$base->compositeImage($card_main, Imagick::COMPOSITE_DEFAULT, ($main_width - $cm_width)/2 - $offset, ($main_height - $cm_height)/2);
 	// put rank text in, first top left, then rotated bottom right
 	$base->compositeImage($rank_text, Imagick::COMPOSITE_DEFAULT, $buffer + ($sm_width-$rank_width)/2, $buffer);
 	$rank_text->rotateImage("none",180);
@@ -102,8 +138,7 @@ function gen_card($suit, $rank) {
 	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $buffer, $rank_height + 2*$buffer);
 	$suit_marker->rotateImage("none",180);
 	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $main_width - $buffer - $sm_width, $main_height - $buffer - ($rank_height + $sm_height + $buffer));
-	$base->compositeImage($card_main, Imagick::COMPOSITE_DEFAULT, ($main_width - $cm_width)/2, ($main_height - $cm_height)/2);
-// TODO - more
+
 	// save
 	$base->writeImage("cards/".$suit."_".$rank."_finish.png");
 	// TODO - return error if there is one?
