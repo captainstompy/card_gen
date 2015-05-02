@@ -1,7 +1,71 @@
 <?php
 
-$suits = array('Heart','Diamond','Shield','Cup','Club','Spade','Bottle','Anchor','Crown');//,'club');
-$ranks = array('Ace',2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Bishop','Cardinal','Pope','God');
+// Command line arguments:
+// suits
+// ranks
+// buffer
+// card size
+// image location
+// image files
+
+function parseArgs() {
+	global $argc;
+	global $argv;
+	$options = array();
+	for($i=1;$i<$argc;$i++) {
+		$split = explode('=',$argv[$i]);
+		if (count($split) != 2) continue;
+		// TODO - THIS IS A HACCCCCK
+		if (in_array($split[0],array('suits','ranks'))) {
+			$split[1] = json_decode($split[1],true);
+		} // end hack :P
+		$options[$split[0]] = $split[1];
+	}
+	return $options;
+}
+
+// TODO - i don't want this called by anyone that's not a function
+function getArg($key) {
+	global $options;
+	$defaults = array(
+		'buffer' => 20,
+		'suits' => array('Heart','Diamond','Shield','Cup','Club','Spade','Bottle','Anchor','Crown'),
+		'ranks' => array('Ace',2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Bishop','Cardinal','Pope','God'),
+		'main_card_width' => 822,
+		'main_card_height' => 1122,
+		'image_location' => "images/",
+		'finished_cards_location' => "cards/",
+		// TODO - figure out how to do templates or something; might be easier with a class structure
+		'text_file_name_format' => "",
+		'tiny_suit_name_format' => "",
+		'main_suit_graphic_name_format' => "",
+		'main_suit_big_name_format' => "", // note - this is for aces and facecards
+	);
+	if (isset($options[$key])) {
+		$value = $options[$key];
+	} else if (isset($defaults[$key])) {
+		$value = $defaults[$key];
+	} else {} // TODO this would be an error
+	return $value;
+}
+
+// the buffer for the text/suit up in the corner
+function getIDBuffer() {
+	return getArg('buffer');
+}
+
+function getSuits() {
+	return getArg('suits');
+}
+
+function getRanks() {
+	return getArg('ranks');
+}
+
+$options = parseArgs();
+
+$suits = getSuits();
+$ranks = getRanks();
 
 foreach($suits as $suit) {
 	foreach($ranks as $rank) {
@@ -26,7 +90,7 @@ function gen_card($suit, $rank) {
 	$cm_height = $card_main->getImageHeight();
 	$cm_width = $card_main->getImageWidth();
 
-	$buffer = 20;
+	$buffer = getIDBuffer();
 	$main_width = 822;
 	$main_height = 1122;
 	// make the card
