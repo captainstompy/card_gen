@@ -28,7 +28,7 @@ function parseArgs() {
 function getArg($key) {
 	global $options;
 	$defaults = array(
-		'buffer' => 20,
+		'buffer' => 30,
 		'suits' => array('Heart','Diamond','Shield','Cup','Club','Spade','Bottle','Anchor','Crown'),
 		'ranks' => array('Ace',2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Bishop','Cardinal','Pope','God'),
 		'main_card_width' => 822,
@@ -36,7 +36,11 @@ function getArg($key) {
 		'image_location' => "images/",
 		'finished_cards_location' => "cards/",
 		'center_offset' => 'none', // note - left or right or none
-		'center_image_size' => 600, // note - this is the size of whatever in the image you want to center
+		'center_image_width' => 600, // note - this is the size of whatever in the image you want to center
+		'center_image_height' => 800, // note - this is the size of whatever in the image you want to center
+		'scale_width' => 0,
+		'scale_height' => 0,
+		'debug' => false, // TODO - DONT CHECK THIS IN AS TRUE YO!
 		// TODO - figure out how to do templates or something; might be easier with a class structure
 		'text_file_name_format' => "",
 		'tiny_suit_name_format' => "",
@@ -78,7 +82,28 @@ function getCenterOffset() {
 	return getArg('center_offset');
 }
 function getCenterImageSize() {
-	return getArg('center_image_size');
+	return array('w'=>getArg('center_image_width'), 'h'=>getArg('center_image_height'));
+}
+
+function getScale() {
+	$scale = array('w'=>getArg('scale_width'), 'h'=>getArg('scale_height'));
+	if ($scale['w'] != 0 || $scale['h'] != 0) return $scale;
+	return false;
+}
+
+// the main directory where the card source images are kept
+function getImageLocation() {
+	return getArg('image_location');
+}
+
+// the directory in which to save the completed cards
+function getSaveLocation() {
+	return getArg('finished_cards_location');
+}
+
+// good for figuring out placement
+function getDebugValue() {
+	return getArg('debug');
 }
 
 $options = parseArgs();
@@ -95,7 +120,7 @@ foreach($suits as $suit) {
 // and gen jokers todo
 
 function gen_card($suit, $rank) {
-	$base = new Imagick('images/base.png');
+	$base = new Imagick(getImageLocation().'base.png');
 	// get the component imgs
 	$rank_text = get_rank_text($suit, $rank);
 	$suit_marker = get_suit_marker($suit);
@@ -108,28 +133,42 @@ function gen_card($suit, $rank) {
 
 	$cm_height = $card_main->getImageHeight();
 	$cm_width = $card_main->getImageWidth();
+// these are for center image placement; in most cases, it is the same as the full width/height, but when offsetting, it's the size of the portion of the image we want centered
+	$cim_width = $cm_width;
+	$cim_height = $cm_height;
 
 	$buffer = getIDBuffer();
 	$main_width = getCardWidth();
 	$main_height = getCardHeight();
 
-	// TODO offset the center image
+	// do we offset the center image?
 	$offset_dir = getCenterOffset();
-	$offset = 0;
+	$w_offset = 0;
+	$h_offset = 0;
+	// $offset_dir is the direction we WANT TO MOVE IT!!
 	if ($offset_dir != "none") {
-		$centering_width = getCenterImageSize();
-		if ($offset_dir == "left") {
-			// means the whole image should be shifted from the left
-			$offset = $cm_width - $centering_width;
-		} else if ($offset_dir == "right") {
-			// means the whole image should be shifted from the right
-			// basically negative left
-			$offset = -$cm_width + $centering_width;
+		$center_size = getCenterImageSize();
+		$centering_width = $center_size['w'];
+		$centering_height = $center_size['h'];
+		if (strpos($offset_dir, "left") !== false) {
+			// means the whole image should be shifted left
+			$w_offset = $cm_width - $centering_width;
+			$cim_width = $centering_width; // this is when we want it to be not the full width
+		} else if (strpos($offset_dir, "right") !== false) {
+			// means the whole image should be shifted right
+			$cim_width = $centering_width; // this is when we want it to be not the full width
+		}
+
+		if (strpos($offset_dir, "top") !== false) {
+			$cim_height = $centering_height;
+		} else if (strpos($offset_dir, "bottom") !== false) {
+			$h_offset = -$cm_height + $centering_height;
+			$cim_height = $centering_height;
 		}
 	}
 
 	// make the card; start with putting on the middle image
-	$base->compositeImage($card_main, Imagick::COMPOSITE_DEFAULT, ($main_width - $cm_width)/2 - $offset, ($main_height - $cm_height)/2);
+	$base->compositeImage($card_main, Imagick::COMPOSITE_DEFAULT, ($main_width - $cim_width)/2 - $w_offset, ($main_height - $cim_height)/2 - $h_offset);
 	// put rank text in, first top left, then rotated bottom right
 	$base->compositeImage($rank_text, Imagick::COMPOSITE_DEFAULT, $buffer + ($sm_width-$rank_width)/2, $buffer);
 	$rank_text->rotateImage("none",180);
@@ -139,8 +178,28 @@ function gen_card($suit, $rank) {
 	$suit_marker->rotateImage("none",180);
 	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $main_width - $buffer - $sm_width, $main_height - $buffer - ($rank_height + $sm_height + $buffer));
 
+	if (getDebugValue()) {
+		// Debugging lines!!
+		$draw = new ImagickDraw();
+		$draw->setStrokeWidth(1);
+		$draw->setStrokeColor("#888888");
+		// center
+		$draw->line($main_width/2, 0, $main_width/2, $main_height);
+		$draw->line(0, $main_height/2, $main_width, $main_height/2);
+		// where it is
+		$draw->line(($main_width-$cim_width)/2-$w_offset,0,($main_width-$cim_width)/2-$w_offset, $main_height);
+		$draw->line(0, ($main_height - $cim_height)/2 - $h_offset, $main_width, ($main_height - $cim_height)/2 - $h_offset);
+		// where it should have been
+		$draw->setStrokeColor("#00FF00");
+		$draw->line(($main_width-$cm_width)/2,0,($main_width-$cm_width)/2, $main_height);
+		$draw->line(($main_width-$cm_width)/2+$cm_width,0,($main_width-$cm_width)/2+$cm_width, $main_height);
+		$draw->line(0, ($main_height - $cm_height)/2, $main_width, ($main_height - $cm_height)/2);
+		$draw->line(0, ($main_height - $cm_height)/2+$cm_height, $main_width, ($main_height - $cm_height)/2+$cm_height);
+		$base->drawImage($draw);
+	}
+
 	// save
-	$base->writeImage("cards/".$suit."_".$rank."_finish.png");
+	$base->writeImage(getSaveLocation().$suit."_".$rank."_finish.png");
 	// TODO - return error if there is one?
 }
 
@@ -168,20 +227,30 @@ function getSuitColor($suit) {
 
 function get_rank_text($suit, $rank) {
 	$color = getSuitColor($suit);
-	return get_image("Text/".$color."_".$rank."_rank_text.png");
+	$img = get_image("Text/".$color."_".$rank."_rank_text.png");
+	$img->scaleImage(0,75);
+	return $img;
+	//return get_image("Text/".$color."_".$rank."_rank_text.png");
 }
 
 function get_suit_marker($suit) {
 	$color = getSuitColor($suit);
-	return get_image($color."/".$suit."_small.png");
+	$img = get_image($color."/".$suit."_small.png");
+	$scale = getScale();
+	if (is_array($scale)) {
+		$img->scaleImage($scale['w'], $scale['h']);
+	}
+	return $img;
 }
 
 function get_card_main($suit, $rank) {
 	if (is_numeric($rank)) { 
 		$suit_graphic = get_suit_graphic($suit);
-		// TODO - assemble
+		// assemble
 		$card_main = new Imagick();
-		$card_main->newImage(600, 1122, "#FFFFFF");//TODO - what size??
+		$background = "#FFFFFF";
+		if (getDebugValue()) $background = "#FFFF99";
+		$card_main->newImage(600, 1122, $background);// TODO - these sizes shouldn't be hard coded >.>
 		$card_main->setImageFormat("png");
 
 		$card_height = $card_main->getImageHeight();
@@ -194,7 +263,6 @@ function get_card_main($suit, $rank) {
 		$side_buffer = 50;
 
 		switch($rank) {
-// TODO - add flippies to the points
 			case 2:
 				$points = array(
 					array('x'=>($card_width-$suit_width)/2, 'y'=>$top_buffer),
@@ -311,5 +379,5 @@ function get_face_card($suit, $rank) {
 }
 
 function get_image($image_name) {
-	return new Imagick("images/".$image_name);
+	return new Imagick(getImageLocation().$image_name);
 }

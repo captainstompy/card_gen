@@ -1,10 +1,10 @@
-#php gen_cards.php suits=[\"Shield\"] center_offset="right" center_image_width=600 scale_height=75
-#php gen_cards.php suits=[\"Heart\"] center_offset="right" center_image_width=600 scale_width=75
-#php gen_cards.php suits=[\"Diamond\"] scale_width=75
-#php gen_cards.php suits=[\"Spade\"] scale_height=75
-#php gen_cards.php suits=[\"Club\"] center_offset="left" center_image_width=600 scale_width=75
-#php gen_cards.php suits=[\"Cup\"] ranks=[\"Jack\",\"Queen\",\"King\",\"Bishop\",\"Cardinal\",\"Pope\",\"God\"] center_offset="leftbottom" center_image_width=500 center_image_height=700 scale_width=60
-#php gen_cards.php suits=[\"Cup\"] ranks=[\"Ace\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\"] scale_width=60
-#php gen_cards.php suits=[\"Crown\"] scale_width=75
-#php gen_cards.php suits=[\"Bottle\"] center_offset="left" center_image_width=600 scale_height=75
+php gen_cards.php suits=[\"Shield\"] center_offset="right" center_image_width=600 scale_height=75
+php gen_cards.php suits=[\"Heart\"] center_offset="right" center_image_width=600 scale_width=75
+php gen_cards.php suits=[\"Diamond\"] scale_width=75
+php gen_cards.php suits=[\"Spade\"] scale_height=75
+php gen_cards.php suits=[\"Club\"] center_offset="left" center_image_width=600 scale_width=75
+php gen_cards.php suits=[\"Cup\"] ranks=[\"Jack\",\"Queen\",\"King\",\"Bishop\",\"Cardinal\",\"Pope\",\"God\"] center_offset="leftbottom" center_image_width=500 center_image_height=700 scale_width=60
+php gen_cards.php suits=[\"Cup\"] ranks=[\"Ace\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\"] scale_width=60
+php gen_cards.php suits=[\"Crown\"] scale_width=75
+php gen_cards.php suits=[\"Bottle\"] center_offset="left" center_image_width=600 scale_height=75
 php gen_cards.php suits=[\"Anchor\"] scale_height=75
