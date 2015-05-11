@@ -31,6 +31,7 @@ function getArg($key) {
 		'buffer' => 30,
 		'suits' => array('Heart','Diamond','Shield','Cup','Club','Spade','Bottle','Anchor','Crown'),
 		'ranks' => array('Ace',2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Bishop','Cardinal','Pope','God'),
+		'jokers' => false,
 		'main_card_width' => 822,
 		'main_card_height' => 1122,
 		'image_location' => "images/",
@@ -66,6 +67,9 @@ function getSuits() {
 }
 function getRanks() {
 	return getArg('ranks');
+}
+function getMakeJokers() {
+	return getArg('jokers');
 }
 
 // card size
@@ -118,6 +122,12 @@ foreach($suits as $suit) {
 }
 
 // and gen jokers todo
+if (getMakeJokers()) {
+	$colour = array('black', 'blue', 'red');
+	foreach($colour as $c) {
+		gen_card($c, 'joker');
+	}
+}
 
 function gen_card($suit, $rank) {
 	$base = new Imagick(getImageLocation().'base.png');
@@ -160,9 +170,9 @@ function gen_card($suit, $rank) {
 		}
 
 		if (strpos($offset_dir, "top") !== false) {
+			$h_offset = $cm_height - $centering_height;
 			$cim_height = $centering_height;
 		} else if (strpos($offset_dir, "bottom") !== false) {
-			$h_offset = -$cm_height + $centering_height;
 			$cim_height = $centering_height;
 		}
 	}
@@ -208,16 +218,19 @@ function getSuitColor($suit) {
 		case 'Diamond':
 		case 'Heart':
 		case 'Shield':
+		case 'red':
 			$color = "Red";
 			break;
 		case 'Club':
 		case 'Spade':
 		case 'Cup':
+		case 'black':
 			$color = "Black";
 			break;
 		case 'Bottle':
 		case 'Anchor':
 		case 'Crown':
+		case 'blue':
 		default:
 			$color = "Blue";
 			break;
@@ -227,10 +240,8 @@ function getSuitColor($suit) {
 
 function get_rank_text($suit, $rank) {
 	$color = getSuitColor($suit);
-	$img = get_image("Text/".$color."_".$rank."_rank_text.png");
-	$img->scaleImage(0,75);
-	return $img;
-	//return get_image("Text/".$color."_".$rank."_rank_text.png");
+	$rank = (is_numeric($rank) || $rank=='joker') ? $rank : $rank[0];
+	return get_image("Text/".$color."-".$rank.".png");
 }
 
 function get_suit_marker($suit) {
