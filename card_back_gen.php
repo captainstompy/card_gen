@@ -61,6 +61,16 @@ $suit = $suits[0];
 $suit_height = $suit->getImageHeight();
 $suit_width = $suit->getImageWidth();
 
+$suit1 = $suits[0];
+$suit2 = $suits[1];
+$suit3 = $suits[2];
+$suit4 = $suits[3];
+$suit5 = $suits[4];
+$suit6 = $suits[5];
+$suit7 = $suits[6];
+$suit8 = $suits[7];
+$suit9 = $suits[8];
+
 $o = array('x'=>$main_width/2,'y'=>$main_height/2);
 $conv = 2*pi()/360;
 $sin40 = sin(40*$conv);
@@ -76,16 +86,6 @@ $a6 = transform($o, $a1, 200*$conv);
 $a7 = transform($o, $a1, 240*$conv);
 $a8 = transform($o, $a1, 280*$conv);
 $a9 = transform($o, $a1, 320*$conv);
-
-$suit1 = $suits[0];
-$suit2 = $suits[1];
-$suit3 = $suits[2];
-$suit4 = $suits[3];
-$suit5 = $suits[4];
-$suit6 = $suits[5];
-$suit7 = $suits[6];
-$suit8 = $suits[7];
-$suit9 = $suits[8];
 
 $s2 = $suit2->getImageHeight();
 $s3 = $suit3->getImageHeight();
@@ -139,7 +139,7 @@ function transform($o, $a1, $deg) {
 
 function getSuitImg($suit) {
 	$color = getSuitColor($suit);
-	return new Imagick("images/".$color."/".$suit.".png");
+	return new Imagick("images/".$color."/".$suit."_small.png");
 }
 function getSuitColor($suit) {
 	switch ($suit) {
