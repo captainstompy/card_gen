@@ -28,7 +28,8 @@ function parseArgs() {
 function getArg($key) {
 	global $options;
 	$defaults = array(
-		'buffer' => 30,
+		'buffer' => 36, // note - this is the sides buffer
+		'spacing' => 20, // note - this is between the rank and icon
 		'suits' => array('Heart','Diamond','Shield','Cup','Club','Spade','Bottle','Anchor','Crown'),
 		'ranks' => array('Ace',2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Bishop','Cardinal','Pope','God'),
 		'jokers' => false,
@@ -59,6 +60,9 @@ function getArg($key) {
 // the buffer for the text/suit up in the corner
 function getIDBuffer() {
 	return getArg('buffer');
+}
+function getSpacing() {
+	return getArg('spacing');
 }
 
 // which suits/ranks to create
@@ -148,6 +152,7 @@ function gen_card($suit, $rank) {
 	$cim_height = $cm_height;
 
 	$buffer = getIDBuffer();
+	$spacing = getSpacing();
 	$main_width = getCardWidth();
 	$main_height = getCardHeight();
 
@@ -184,9 +189,9 @@ function gen_card($suit, $rank) {
 	$rank_text->rotateImage("none",180);
 	$base->compositeImage($rank_text, Imagick::COMPOSITE_DEFAULT, $main_width - $buffer - $rank_width - ($sm_width - $rank_width)/2, $main_height - $buffer - $rank_height);
 	// put suit marker in, first top left, then rotated bottom right
-	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $buffer, $rank_height + 2*$buffer);
+	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $buffer, $rank_height + $buffer + $spacing);
 	$suit_marker->rotateImage("none",180);
-	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $main_width - $buffer - $sm_width, $main_height - $buffer - ($rank_height + $sm_height + $buffer));
+	$base->compositeImage($suit_marker, Imagick::COMPOSITE_DEFAULT, $main_width - $buffer - $sm_width, $main_height - $buffer - ($rank_height + $sm_height + $spacing));
 
 	if (getDebugValue()) {
 		// Debugging lines!!

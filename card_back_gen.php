@@ -27,17 +27,12 @@ $draw->setStrokeWidth($line_width);
 $draw->setFillColor("none");
 
 $border = 10;
+$borderplus = 4;
 $colours = array("#C01F25", "#000000", "#0B6292");
 foreach($colours as $key => $c) {
 	$draw->setStrokeColor($c);
-
-	$points = array(
-		array('x'=>($key+1)*$border + $key*$line_width,'y'=>($key+1)*$border + $key*$line_width),
-		array('x'=>$main_width-(($key+1)*$border+$key*$line_width),'y'=>($key+1)*$border+$key*$line_width),
-		array('x'=>$main_width-(($key+1)*$border+$key*$line_width),'y'=>$main_height-(($key+1)*$border+$key*$line_width)),
-		array('x'=>($key+1)*$border+$key*$line_width,'y'=>$main_height-(($key+1)*$border+$key*$line_width))
-	);
-	$draw->polygon($points);
+	$draw->line(0,($key+1)*$borderplus*$border+36, $main_width,($key+1)*$borderplus*$border+36);
+	$draw->line(0, $main_height-($key+1)*$borderplus*$border-36, $main_width, $main_height-($key+1)*$borderplus*$border-36);
 }
 /* TODO - this is something weird
 $start = array('x'=>4*$border+3*$line_width,'y'=>4*$border+3*$line_width);
