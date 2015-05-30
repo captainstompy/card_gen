@@ -1,6 +1,6 @@
 <?php
 $image = new Imagick();
-$image->newImage(822,1122,"#FFFFFF");
+$image->newImage(825,1125,"#FFFFFF");
 $image->setImageFormat("png");
 
 // add in the suits in a circle!
@@ -117,6 +117,8 @@ $points = array(
 foreach($points as $key => $point) {
 	compImg($image, $suits[$key], $point); // TODO - make sure the suits are actually turned!
 }
+
+$image->transformImageColorspace(Imagick::COLORSPACE_CMYK);
 
 $image->writeImage("card_back.png");
 
