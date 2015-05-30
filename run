@@ -1,0 +1,8 @@
+[[ -d cards ]] || mkdir cards
+[[ -d cards_exp ]] || mkdir cards_exp && mkdir cards_exp/cards
+[[ -d cards_cmyk ]] || mkdir cards_cmyk
+php main.php
+php add_bleed.php
+php make_cmyk.php
+php card_back_gen.php
+php cards_pdf.php
